@@ -23,10 +23,16 @@ const schema = yup.object({
     .integer()
     .min(5, "Minimum age is 5")
     .required("Age is required"),
-  cnic: yup.string().when("age", ([age], schema) => {
+  hasCnic: yup.string().when("age", ([age], schema) => {
     if (Number(age) >= 18) {
+      return schema.oneOf(["yes", "no"]).required("Please select CNIC status");
+    }
+    return schema.optional().nullable();
+  }),
+  cnic: yup.string().when(["age", "hasCnic"], ([age, hasCnic], schema) => {
+    if (Number(age) >= 18 && hasCnic === "yes") {
       return schema
-        .required("CNIC is required for members aged 18+")
+        .required("CNIC is required")
         .matches(/^\d{5}-\d{7}-\d$/, "Format: 12345-1234567-1");
     }
     return schema.optional().nullable();
@@ -55,6 +61,7 @@ const defaultValues = {
   phone: "",
   gender: "male",
   age: "",
+  hasCnic: "yes",
   cnic: "",
   address: "",
   admissionFees: "",
@@ -66,10 +73,14 @@ const useMemberForm = (editMember = null) => {
   const form = useForm({
     resolver: yupResolver(schema),
     defaultValues,
+    mode: "onChange",
   });
 
   const age = form.watch("age");
-  const showCnic = Number(age) >= 18;
+  const hasCnicVal = form.watch("hasCnic");
+  
+  const showCnicGroup = Number(age) >= 18;
+  const showCnicField = showCnicGroup && hasCnicVal === "yes";
 
   useEffect(() => {
     if (editMember) {
@@ -78,6 +89,7 @@ const useMemberForm = (editMember = null) => {
         phone: editMember.phone,
         gender: editMember.gender,
         age: editMember.age,
+        hasCnic: (editMember.cnic && editMember.cnic.length > 0) ? "yes" : "no",
         cnic: editMember.cnic ?? "",
         address: editMember.address ?? "",
         admissionFees: editMember.admissionFees ?? "",
@@ -89,7 +101,7 @@ const useMemberForm = (editMember = null) => {
     }
   }, [editMember]);
 
-  return { form, showCnic };
+  return { form, showCnicGroup, showCnicField };
 };
 
 export default useMemberForm;

@@ -31,18 +31,27 @@ const formatCnic = (value) => {
 };
 
 const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serverError }) => {
-  const { form, showCnic } = useMemberForm(editMember);
+  const { form, showCnicGroup, showCnicField } = useMemberForm(editMember);
   const {
     register,
     handleSubmit,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
   } = form;
 
   const handleClose = () => {
     form.reset();
     onOpenChange(false);
+  };
+
+  const handleInvalidSubmit = (errors) => {
+    const firstError = Object.values(errors)[0]?.message;
+    if (firstError) {
+      alert(firstError);
+    } else {
+      alert("Please fill all required fields");
+    }
   };
 
   return (
@@ -73,7 +82,7 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
           )}
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
+        <form onSubmit={handleSubmit(onSubmit, handleInvalidSubmit)} className="space-y-5 pt-1">
           {/* Full Name + Contact */}
           <div className="grid grid-cols-2 gap-4">
             <InputField
@@ -133,9 +142,39 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
             />
           </div>
 
-          {/* CNIC (age >= 18 only) + Address */}
-          <div className={cn("grid gap-4", showCnic ? "grid-cols-2" : "grid-cols-1")}>
-            {showCnic && (
+          {/* CNIC Toggle (age >= 18 only) */}
+          {showCnicGroup && (
+            <div className="space-y-3">
+              <label className="text-sm font-medium leading-none">Does the member have a CNIC?</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    value="yes"
+                    {...register("hasCnic")}
+                    className="w-4 h-4 text-primary accent-primary"
+                  />
+                  Yes, has CNIC
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    value="no"
+                    {...register("hasCnic")}
+                    className="w-4 h-4 text-primary accent-primary"
+                  />
+                  No CNIC
+                </label>
+              </div>
+              {errors.hasCnic && (
+                <p className="text-xs text-destructive">{errors.hasCnic.message}</p>
+              )}
+            </div>
+          )}
+
+          {/* CNIC Field + Address */}
+          <div className={cn("grid gap-4", showCnicField ? "grid-cols-2" : "grid-cols-1")}>
+            {showCnicField && (
               <Controller
                 name="cnic"
                 control={control}
@@ -154,7 +193,7 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
             )}
             <InputField
               id="address"
-              label={showCnic ? "Address" : "Address (Optional)"}
+              label={showCnicField ? "Address" : "Address (Optional)"}
               placeholder="Street, City"
               registration={register("address")}
               error={errors.address}
@@ -208,7 +247,10 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+              className={cn(
+                "rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-colors",
+                (!isValid || isLoading) ? "bg-primary/60 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
+              )}
             >
               {isLoading ? "Saving..." : editMember ? "Update Member" : "Add Member"}
             </button>
