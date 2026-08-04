@@ -109,8 +109,8 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
             />
           </div>
 
-          {/* Gender + Age */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Gender, Shift + Age */}
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">Gender</label>
               <Select
@@ -132,6 +132,28 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
                 <p className="text-xs text-destructive">{errors.gender.message}</p>
               )}
             </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">Shift</label>
+              <Select
+                onValueChange={(val) =>
+                  setValue("shift", val, { shouldValidate: true })
+                }
+                defaultValue={editMember?.shift ?? "morning"}
+              >
+                <SelectTrigger className={cn(errors.shift && "border-destructive")}>
+                  <SelectValue placeholder="Select shift" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="morning">Morning</SelectItem>
+                  <SelectItem value="evening">Evening</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.shift && (
+                <p className="text-xs text-destructive">{errors.shift.message}</p>
+              )}
+            </div>
+
             <InputField
               id="age"
               label="Age"

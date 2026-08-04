@@ -16,6 +16,10 @@ const schema = yup.object({
     .string()
     .oneOf(["male", "female", "other"])
     .required("Gender is required"),
+  shift: yup
+    .string()
+    .oneOf(["morning", "evening"])
+    .required("Shift is required"),
   age: yup
     .number()
     .typeError("Age must be a number")
@@ -60,6 +64,7 @@ const defaultValues = {
   fullName: "",
   phone: "",
   gender: "male",
+  shift: "morning",
   age: "",
   hasCnic: "yes",
   cnic: "",
@@ -88,6 +93,7 @@ const useMemberForm = (editMember = null) => {
         fullName: editMember.fullName,
         phone: editMember.phone,
         gender: editMember.gender,
+        shift: editMember.shift || "morning",
         age: editMember.age,
         hasCnic: (editMember.cnic && editMember.cnic.length > 0) ? "yes" : "no",
         cnic: editMember.cnic ?? "",
