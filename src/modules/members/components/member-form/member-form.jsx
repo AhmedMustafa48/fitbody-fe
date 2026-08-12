@@ -117,7 +117,7 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
                 onValueChange={(val) =>
                   setValue("gender", val, { shouldValidate: true })
                 }
-                defaultValue={editMember?.gender ?? "male"}
+                value={form.watch("gender") || undefined}
               >
                 <SelectTrigger className={cn(errors.gender && "border-destructive")}>
                   <SelectValue placeholder="Select gender" />
@@ -139,7 +139,7 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
                 onValueChange={(val) =>
                   setValue("shift", val, { shouldValidate: true })
                 }
-                defaultValue={editMember?.shift ?? "morning"}
+                value={form.watch("shift") || undefined}
               >
                 <SelectTrigger className={cn(errors.shift && "border-destructive")}>
                   <SelectValue placeholder="Select shift" />

@@ -14,11 +14,11 @@ const schema = yup.object({
     .matches(/^\d{4}-\d{7}$/, "Format: 03xx-xxxxxxx"),
   gender: yup
     .string()
-    .oneOf(["male", "female", "other"])
+    .oneOf(["male", "female", "other"], "Gender is required")
     .required("Gender is required"),
   shift: yup
     .string()
-    .oneOf(["morning", "evening"])
+    .oneOf(["morning", "evening"], "Shift is required")
     .required("Shift is required"),
   age: yup
     .number()
@@ -63,8 +63,8 @@ const schema = yup.object({
 const defaultValues = {
   fullName: "",
   phone: "",
-  gender: "male",
-  shift: "morning",
+  gender: "",
+  shift: "",
   age: "",
   hasCnic: "yes",
   cnic: "",
@@ -92,8 +92,8 @@ const useMemberForm = (editMember = null) => {
       form.reset({
         fullName: editMember.fullName,
         phone: editMember.phone,
-        gender: editMember.gender,
-        shift: editMember.shift || "morning",
+        gender: editMember.gender || "",
+        shift: editMember.shift || "",
         age: editMember.age,
         hasCnic: (editMember.cnic && editMember.cnic.length > 0) ? "yes" : "no",
         cnic: editMember.cnic ?? "",

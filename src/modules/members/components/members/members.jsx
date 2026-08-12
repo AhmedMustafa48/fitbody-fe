@@ -60,9 +60,14 @@ const Members = () => {
 
   const handleFormSubmit = (formData) => {
     setServerError("");
+    const submissionData = { ...formData };
+    if (!submissionData.cnic || Number(submissionData.age) < 18 || submissionData.hasCnic === "no") {
+      delete submissionData.cnic;
+    }
+
     if (editMember) {
       updateMember.mutate(
-        { id: editMember._id, data: formData },
+        { id: editMember._id, data: submissionData },
         {
           onSuccess: () => {
             setFormOpen(false);
@@ -75,7 +80,7 @@ const Members = () => {
         }
       );
     } else {
-      createMember.mutate(formData, {
+      createMember.mutate(submissionData, {
         onSuccess: () => setFormOpen(false),
         onError: (err) =>
           setServerError(
