@@ -20,6 +20,7 @@ const FEE_STATUS = {
   paid: { label: "Paid", className: "bg-green-100 text-green-700" },
   overdue: { label: "Overdue", className: "bg-red-100 text-red-700" },
   never_paid: { label: "Never Paid", className: "bg-muted text-muted-foreground" },
+  free: { label: "Free (Staff)", className: "bg-blue-100 text-blue-700" },
 };
 
 const ExpiryAlert = ({ daysLeft }) => {
@@ -75,7 +76,8 @@ const MembersTable = ({ members, onEdit, onDelete, onView }) => {
           <tbody className="divide-y divide-border">
             {members.map((member) => {
               const daysLeft = getDaysLeft(member.feeExpiry);
-              const statusCfg = FEE_STATUS[member.feeStatus] ?? FEE_STATUS.never_paid;
+              const feeStatus = member.feesAfterDiscount === 0 ? "free" : member.feeStatus;
+              const statusCfg = FEE_STATUS[feeStatus] ?? FEE_STATUS.never_paid;
 
               return (
                 <tr key={member._id} className="hover:bg-muted/20 transition-colors">

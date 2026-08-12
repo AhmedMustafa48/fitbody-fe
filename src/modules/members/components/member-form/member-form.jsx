@@ -147,6 +147,8 @@ const MemberForm = ({ open, onOpenChange, onSubmit, editMember, isLoading, serve
                 <SelectContent>
                   <SelectItem value="morning">Morning</SelectItem>
                   <SelectItem value="evening">Evening</SelectItem>
+                  <SelectItem value="ladies">Ladies</SelectItem>
+                  <SelectItem value="both">Both (Morning, Evening)</SelectItem>
                 </SelectContent>
               </Select>
               {errors.shift && (

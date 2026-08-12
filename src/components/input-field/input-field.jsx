@@ -19,6 +19,15 @@ const InputField = ({
           "h-10 transition-colors focus:ring-1 focus:ring-primary",
           error && "border-red-500 focus:ring-red-500"
         )}
+        min={props.type === "number" ? props.min ?? "0" : undefined}
+        onKeyDown={(e) => {
+          if (props.type === "number") {
+            if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
+              e.preventDefault();
+            }
+          }
+          if (props.onKeyDown) props.onKeyDown(e);
+        }}
         {...registration}
         {...props}
       />

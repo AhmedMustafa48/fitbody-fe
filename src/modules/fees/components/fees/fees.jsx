@@ -24,6 +24,12 @@ const STATUS_TABS = [
   { label: "Never Paid", value: "never_paid" },
 ];
 
+const GENDER_TABS = [
+  { value: "", label: "All", key: "all" },
+  { value: "male", label: "Male", key: "male" },
+  { value: "female", label: "Female", key: "female" },
+];
+
 const fmt = (date) =>
   date
     ? new Date(date).toLocaleDateString("en-PK", {
@@ -39,12 +45,14 @@ const StatusBadge = ({ status }) => {
     partial: "bg-blue-100 text-blue-700",
     overdue: "bg-red-100 text-red-700",
     never_paid: "bg-muted text-muted-foreground",
+    free: "bg-indigo-100 text-indigo-700",
   };
   const labels = {
     paid: "Paid",
     partial: "Partially Paid",
     overdue: "Overdue",
     never_paid: "Never Paid",
+    free: "Free (Staff)",
   };
   return (
     <span
@@ -77,6 +85,7 @@ const StatCard = ({ icon: Icon, label, value, iconBg, iconColor }) => (
 
 const Fees = () => {
   const [statusFilter, setStatusFilter] = useState("all");
+  const [gender, setGender] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [collectTarget, setCollectTarget] = useState(null);
@@ -87,6 +96,7 @@ const Fees = () => {
 
   const { data, isLoading, isError, error } = useFeesOverview({
     ...(statusFilter !== "all" && { status: statusFilter }),
+    ...(gender && { gender }),
     ...(debouncedSearch && { search: debouncedSearch }),
     page,
     limit: LIMIT,
@@ -165,25 +175,57 @@ const Fees = () => {
       )}
 
       {/* Filters */}
-      <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-        <div className="flex flex-wrap gap-1">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => {
-                setStatusFilter(tab.value);
-                setPage(1);
-              }}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors",
-                statusFilter === tab.value
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-1">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => {
+                  setStatusFilter(tab.value);
+                  setPage(1);
+                }}
+                className={cn(
+                  "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors",
+                  statusFilter === tab.value
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {GENDER_TABS.map((tab) => {
+              const count = data?.genderSummary?.[tab.key];
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => { setGender(tab.value); setPage(1); }}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors",
+                    gender === tab.value
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {tab.label}
+                  {count != null && (
+                    <span className={cn(
+                      "rounded-full px-1.5 py-0.5 text-xs font-semibold leading-none",
+                      gender === tab.value
+                        ? "bg-primary-foreground/20 text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -246,8 +288,9 @@ const Fees = () => {
                 <tbody className="divide-y divide-border">
                   {members.map((member) => {
                     const fee = member.latestFee;
-                    const feeStatus = member.feeStatus;
+                    const feeStatus = member.feesAfterDiscount === 0 ? "free" : member.feeStatus;
                     const isPaid = feeStatus === "paid";
+                    const isFree = feeStatus === "free";
                     const isPartial = feeStatus === "partial";
                     const hasBalance = fee?.remaining > 0;
                     return (
@@ -307,7 +350,7 @@ const Fees = () => {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-right">
-                          {isPaid ? (
+                          {isPaid || isFree ? (
                             <span className="text-xs text-muted-foreground/40">
                               —
                             </span>

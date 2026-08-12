@@ -18,7 +18,7 @@ const schema = yup.object({
     .required("Gender is required"),
   shift: yup
     .string()
-    .oneOf(["morning", "evening"], "Shift is required")
+    .oneOf(["morning", "evening", "ladies", "both"], "Shift is required")
     .required("Shift is required"),
   age: yup
     .number()
