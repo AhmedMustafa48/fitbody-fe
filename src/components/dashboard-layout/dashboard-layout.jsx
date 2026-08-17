@@ -17,8 +17,17 @@ const LayoutContent = () => {
           isSidebarOpen ? "sm:ml-64" : "sm:ml-20"
         )}
       >
-        <div className="p-6">
-          <Outlet />
+        <div className="p-6 flex flex-col items-center">
+          <div className="mb-8 w-full flex justify-center">
+            <img
+              src="/JYM%20LOGO.png"
+              alt="JYM Logo"
+              className="h-155 w-auto object-contain drop-shadow-sm"
+            />
+          </div>
+          <div className="w-full">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

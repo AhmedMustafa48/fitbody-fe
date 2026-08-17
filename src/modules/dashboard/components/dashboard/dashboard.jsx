@@ -129,39 +129,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Secondary stats row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : (
-          <>
-            <StatCard
-              icon={Banknote}
-              label="Revenue This Month"
-              value={`PKR ${(stats?.monthRevenue ?? 0).toLocaleString()}`}
-              sub="fees collected"
-              iconBg="bg-primary/15"
-              iconColor="text-primary"
-            />
-            <StatCard
-              icon={CheckCircle2}
-              label="Fees Paid Up"
-              value={stats?.feePaid}
-              sub="members current"
-              iconBg="bg-green-100"
-              iconColor="text-green-600"
-            />
-            <StatCard
-              icon={AlertCircle}
-              label="Fees Overdue"
-              value={(stats?.feeOverdue ?? 0) + (stats?.feeNeverPaid ?? 0)}
-              sub={`${stats?.feeOverdue ?? 0} overdue · ${stats?.feeNeverPaid ?? 0} never paid`}
-              iconBg="bg-red-100"
-              iconColor="text-red-500"
-            />
-          </>
-        )}
-      </div>
+
 
       {/* Recent check-ins */}
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">

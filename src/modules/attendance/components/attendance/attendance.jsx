@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { Search, Calendar } from "lucide-react";
-import { cn } from "@lib/utils";
-import useDebounce from "@hooks/use-debounce";
+import { UserPlus, Calendar } from "lucide-react";
 import {
   useActiveMembers,
   useTodayAttendance,
   useMarkAttendance,
 } from "@modules/attendance/components/attendance/use-attendance";
-import AttendancePanel from "@modules/attendance/components/attendance-panel/attendance-panel";
-import InputField from "@components/input-field/input-field";
+import MarkAttendanceModal from "./mark-attendance-modal";
 
 const todayLabel = () =>
   new Date().toLocaleDateString("en-PK", {
@@ -19,8 +16,7 @@ const todayLabel = () =>
   });
 
 const Attendance = () => {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const members = useActiveMembers();
   const todayAtt = useTodayAttendance();
@@ -36,7 +32,7 @@ const Attendance = () => {
   );
 
   const allMembers = members.data?.members ?? [];
-  const presentMembers = allMembers.filter((m) => presentIds.has(m._id));
+  const presentMembersCount = allMembers.filter((m) => presentIds.has(m._id)).length;
   const absentMembers = allMembers.filter((m) => !presentIds.has(m._id));
 
   const handleMark = (memberId, status) => {
@@ -71,44 +67,24 @@ const Attendance = () => {
               <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
               <span className="font-medium text-foreground">
                 Present:{" "}
-                <span className="text-green-600">{presentMembers.length}</span>
+                <span className="text-green-600">{presentMembersCount}</span>
               </span>
             </div>
             <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+              <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground" />
               <span className="font-medium text-foreground">
-                Absent:{" "}
-                <span className="text-red-600">{absentMembers.length}</span>
+                Total:{" "}
+                <span className="text-muted-foreground">{allMembers.length}</span>
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <InputField
-          id="search"
-          placeholder="Search by name or member ID..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          containerClassName="space-y-0"
-          className="pl-10 h-10 bg-card"
-        />
-      </div>
-
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="h-64 animate-pulse rounded-xl bg-muted"
-            />
-          ))}
-        </div>
+        <div className="h-64 animate-pulse rounded-xl bg-muted" />
       )}
 
       {/* Error */}
@@ -125,32 +101,34 @@ const Attendance = () => {
         </div>
       )}
 
-      {/* Panels */}
+      {/* Main Content */}
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <AttendancePanel
-            type="present"
-            members={presentMembers}
-            search={debouncedSearch}
-            onMark={handleMark}
-            pendingId={pendingId}
-          />
-          <AttendancePanel
-            type="absent"
-            members={absentMembers}
-            search={debouncedSearch}
-            onMark={handleMark}
-            pendingId={pendingId}
-          />
+        <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+            <UserPlus className="h-10 w-10 text-primary" />
+          </div>
+          <h2 className="mt-6 text-xl font-semibold text-foreground">Mark Daily Attendance</h2>
+          <p className="mt-2 mb-8 max-w-sm text-sm text-muted-foreground">
+            Click the button below to open the attendance modal and mark members who are present today.
+          </p>
+          
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-transform active:scale-95"
+          >
+            <UserPlus className="h-5 w-5" />
+            Open Attendance Form
+          </button>
         </div>
       )}
 
-      {/* Empty state — no members at all */}
-      {!isLoading && !isError && allMembers.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-10">
-          No active members found. Add members first.
-        </p>
-      )}
+      <MarkAttendanceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        members={absentMembers}
+        onMark={handleMark}
+        pendingId={pendingId}
+      />
     </div>
   );
 };
